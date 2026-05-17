@@ -1,0 +1,26 @@
+name: 04 - Block Mode + Action失敗
+run-name: "[04] Block + Action失敗 — ブロックでワークフローが落ちる"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fail-on-block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner (block mode)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reach unlisted domain — ブロックされてActionが落ちる
+        run: curl --max-time 10 https://httpbin.org/get
