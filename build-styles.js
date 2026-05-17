@@ -264,22 +264,3 @@ const fullCss = css + mediaQueries;
 fs.writeFileSync(path.join(__dirname, "styles.css"), fullCss, "utf8");
 console.log("styles.css を生成しました（theme.json から）");
 
-// HTMLの <link rel="stylesheet" href="styles.css"> をインラインの <style> に置換
-const htmlPath = path.join(__dirname, "harden-runner-report.html");
-const html = fs.readFileSync(htmlPath, "utf8");
-const LINK_TAG = '<link rel="stylesheet" href="styles.css">';
-const STYLE_OPEN = '<style>';
-const STYLE_CLOSE = '</style>';
-const replacement = `<style>\n${fullCss}\n</style>`;
-
-let inlined;
-const styleStart = html.indexOf(STYLE_OPEN);
-if (styleStart !== -1) {
-  const styleEnd = html.indexOf(STYLE_CLOSE, styleStart) + STYLE_CLOSE.length;
-  inlined = html.slice(0, styleStart) + replacement + html.slice(styleEnd);
-} else {
-  const linkStart = html.indexOf(LINK_TAG);
-  inlined = html.slice(0, linkStart) + replacement + html.slice(linkStart + LINK_TAG.length);
-}
-fs.writeFileSync(htmlPath, inlined, "utf8");
-console.log("harden-runner-report.html にCSSをインライン展開しました");
