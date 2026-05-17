@@ -1,0 +1,34 @@
+name: 01 - Audit Mode (観察)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner (audit mode)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (npm)
+        run: npm install --global cowsay
+
+      - name: Curl to external APIs
+        run: |
+          curl -s https://api.github.com/zen
+          curl -s https://httpbin.org/get | head -5
+
+      - name: Done
+        run: echo "Audit complete — check the Harden Runner link in the logs above"

@@ -1,0 +1,36 @@
+name: 03 - Block Mode + 違反 (ブロックされる様子)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  violation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner (block mode - 意図的に狭い許可リスト)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Try to reach unlisted domain — ブロックされるはず
+        # httpbin.org は許可リストに入っていないのでブロックされる
+        run: |
+          echo "Trying to reach httpbin.org (not in allowlist)..."
+          curl --max-time 10 https://httpbin.org/get || echo "Blocked as expected!"
+
+      - name: Try to reach npm registry — ブロックされるはず
+        run: |
+          echo "Trying npm install (registry not in allowlist)..."
+          npm install --global cowsay || echo "Blocked as expected!"
+
+      - name: Done
+        run: echo "Violation demo complete — check the Harden Runner report"

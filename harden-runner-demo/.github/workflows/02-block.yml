@@ -1,0 +1,38 @@
+name: 02 - Block Mode (許可リストのみ通過)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner (block mode)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            nodejs.org:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (npm) — 許可済みなので通過
+        run: npm install --global cowsay
+
+      - name: Curl to allowed endpoint — 通過するはず
+        run: curl -s https://api.github.com/zen
+
+      - name: Done
+        run: echo "Block mode complete — all listed endpoints passed"
