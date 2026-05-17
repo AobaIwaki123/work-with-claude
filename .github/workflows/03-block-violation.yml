@@ -1,4 +1,5 @@
 name: 03 - Block Mode + 違反 (ブロックされる様子)
+run-name: "[03] Block + 違反 — 許可リスト外に通信してブロックされる (${{ github.sha }})"
 
 on:
   push:

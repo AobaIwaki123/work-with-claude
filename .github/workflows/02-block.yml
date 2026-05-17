@@ -1,4 +1,5 @@
 name: 02 - Block Mode (許可リストのみ通過)
+run-name: "[02] Block — 許可リスト外をブロック (${{ github.sha }})"
 
 on:
   push:
