@@ -1,21 +1,7 @@
-# Harden Runner Demo
+# work-with-claude
 
-Harden Runner の動作を3つのワークフローで観察するデモです。
+Claudeに雑務を投げるためのリポジトリです。
 
-## 調査レポート
+作業レポートは GitHub Pages で公開しています。
 
-[調査レポートを見る](https://aobaiwaki123.github.io/work-with-claude/harden-runner-report.html)
-
-## ワークフロー
-
-| ファイル | モード | 目的 |
-|---|---|---|
-| `01-audit.yml` | audit | 通信を記録するだけ。まず何に通信しているか観察 |
-| `02-block.yml` | block | 許可リスト内の通信のみ通過させる |
-| `03-block-violation.yml` | block | 許可リスト外に通信して、ブロックされる様子を確認 |
-
-## 見るべきポイント
-
-1. 各ワークフローの最初のステップ `Harden Runner` のログに **解析リンク** が表示される
-2. そのリンクを開くと通信先ドメイン一覧が見える
-3. `03` では curl と npm がブロックされてエラーになる（意図的）
+[レポート一覧を見る](https://aobaiwaki123.github.io/work-with-claude/)
