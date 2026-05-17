@@ -41,6 +41,21 @@ work-with-claude/
 - CSSは `../styles.css` で参照する（ルートからの相対パス）
 - highlight.jsとmermaid.jsはCDNから読み込む
 - コードブロックには言語クラスを付与する（例：`class="language-yaml"`）
+- ヘッダーとフッターの両方に `index.html` へ戻るリンクを必ず含める
+
+```html
+<!-- ヘッダー：label部分をリンクにする -->
+<header>
+  <div class="label"><a href="../index.html" style="color:#7eceff;text-decoration:none;">← レポート一覧</a></div>
+  ...
+</header>
+
+<!-- フッター -->
+<footer>
+  <p>...</p>
+  <p><a href="../index.html">← レポート一覧に戻る</a></p>
+</footer>
+```
 
 ## GitHub Pages
 
