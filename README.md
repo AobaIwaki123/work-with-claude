@@ -2,6 +2,10 @@
 
 Harden Runner の動作を3つのワークフローで観察するデモです。
 
+## 調査レポート
+
+[HTMLプレビューを見る](https://htmlpreview.github.io/?https://github.com/AobaIwaki123/work-with-claude/blob/main/harden-runner-report.html)
+
 ## ワークフロー
 
 | ファイル | モード | 目的 |
