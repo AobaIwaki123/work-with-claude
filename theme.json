@@ -21,7 +21,7 @@
     "base": "1.8"
   },
   "responsive": {
-    "md": { "minWidth": "900px",  "scale": 1.15, "containerWidth": "1000px" },
-    "lg": { "minWidth": "1280px", "scale": 1.30, "containerWidth": "1100px" }
+    "md": { "minWidth": "900px",  "scale": 1.00, "containerWidth": "1000px" },
+    "lg": { "minWidth": "1280px", "scale": 1.05, "containerWidth": "1100px" }
   }
 }
