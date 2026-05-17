@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harden Runner 調査レポート</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #f4f6fb;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+    }
+    header .label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #7eceff;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    header .meta {
+      font-size: 13px;
+      color: #a0b4c8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* TOC */
+    .toc {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 40px;
+    }
+    .toc h2 {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 14px;
+    }
+    .toc ol {
+      padding-left: 20px;
+    }
+    .toc li {
+      margin: 5px 0;
+    }
+    .toc a {
+      color: #0f3460;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Sections */
+    section {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+    }
+    section h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f3460;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    section h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: 24px 0 10px;
+    }
+    p { margin-bottom: 12px; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 16px 0;
+    }
+    th {
+      background: #f1f5f9;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      color: #475569;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* Code */
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 20px 22px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+    code {
+      background: #f1f5f9;
+      color: #0f3460;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* Callout boxes */
+    .callout {
+      border-left: 4px solid;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .callout.info    { border-color: #3b82f6; background: #eff6ff; }
+    .callout.warn    { border-color: #f59e0b; background: #fffbeb; }
+    .callout.danger  { border-color: #ef4444; background: #fef2f2; }
+    .callout.success { border-color: #10b981; background: #ecfdf5; }
+    .callout strong  { display: block; margin-bottom: 4px; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+    .badge.green  { background: #dcfce7; color: #15803d; }
+    .badge.red    { background: #fee2e2; color: #b91c1c; }
+    .badge.blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge.gray   { background: #f1f5f9; color: #475569; }
+
+    /* Architecture diagram */
+    .arch {
+      background: #1e293b;
+      color: #94a3b8;
+      border-radius: 8px;
+      padding: 20px 22px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      margin: 14px 0;
+    }
+    .arch .highlight { color: #7eceff; }
+    .arch .green     { color: #6ee7b7; }
+    .arch .yellow    { color: #fde68a; }
+
+    /* Flow */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 16px 0;
+    }
+    .flow-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 14px;
+    }
+    .flow-item:last-child { border-bottom: none; }
+    .flow-num {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #0f3460;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* Error box */
+    .error-box {
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 20px 22px;
+      background: #fef2f2;
+      font-size: 14px;
+      margin: 16px 0;
+    }
+    .error-box h4 { color: #b91c1c; font-size: 15px; margin-bottom: 10px; }
+
+    footer {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="label">Security Investigation Report</div>
+  <h1>Harden Runner 調査レポート</h1>
+  <div class="meta">作成日：2026-05-17 &nbsp;|&nbsp; 対象：step-security/harden-runner v2</div>
+</header>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>目次</h2>
+    <ol>
+      <li><a href="#overview">概要</a></li>
+      <li><a href="#architecture">動作アーキテクチャ</a></li>
+      <li><a href="#detection">検知の仕組み</a></li>
+      <li><a href="#demo">デモワークフローで確認した挙動</a></li>
+      <li><a href="#license">ライセンスとサービス構造</a></li>
+      <li><a href="#private">プライベートリポジトリでの挙動（実測）</a></li>
+      <li><a href="#enterprise">エンタープライズ運用の考慮点</a></li>
+      <li><a href="#summary">まとめ</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. Overview -->
+  <section id="overview">
+    <h2>1. 概要</h2>
+    <p>
+      <strong>Harden Runner</strong>（step-security/harden-runner）は、GitHub ActionsのCI/CDランナー上で
+      ネットワーク通信・ファイル操作・プロセス活動をリアルタイム監視するセキュリティエージェントです。
+      StepSecurityが開発し、週間2,500万以上のCI/CD実行を保護しています。
+    </p>
+    <p>
+      Microsoft・Google・Kubernetesなど11,000以上のプロジェクトに採用されており、
+      <code>tj-actions/changed-files</code>侵害（CVE-2025-30066）やaxios npmパッケージ侵害など、
+      実際のサプライチェーン攻撃の検知実績があります。
+    </p>
+
+    <h3>主な機能</h3>
+    <table>
+      <tr><th>機能</th><th>説明</th></tr>
+      <tr><td>ネットワーク監視</td><td>DNS・L3/L4・L7(HTTPS)レベルで通信先を可視化</td></tr>
+      <tr><td>egress-policy: audit</td><td>通信を記録するだけ。ブロックしない</td></tr>
+      <tr><td>egress-policy: block</td><td>許可リスト外の通信を遮断</td></tr>
+      <tr><td>ベースライン比較</td><td>過去の通信パターンと比較し異常を検知</td></tr>
+      <tr><td>グローバルIOCリスト</td><td>既知の悪意あるドメイン/IPを全顧客共有でブロック</td></tr>
+      <tr><td>プロセス監視</td><td>逆シェルやメモリ読み取りなどの攻撃技法を検知</td></tr>
+    </table>
+  </section>
+
+  <!-- 2. Architecture -->
+  <section id="architecture">
+    <h2>2. 動作アーキテクチャ</h2>
+    <p>
+      Harden Runnerは「外部リポジトリを能動的に監視する」ものではありません。
+      <strong>自分のCIランナー上に eBPFエージェントを仕込み、そのランナー上で起きていることを監視する</strong>設計です。
+    </p>
+
+    <div class="arch">
+<span class="highlight">GitHub Actions Runner (ubuntu-latest)</span>
+├─ <span class="green">eBPF エージェント（Harden Runnerが起動時にインストール）</span>
+│   ├─ DNS クエリを全捕捉
+│   ├─ L3/L4 ネットワーク通信を監視
+│   └─ L7 HTTPS の宛先・内容も可視化
+│
+├─ <span class="yellow">StepSecurity クラウドバックエンド</span>
+│   ├─ ベースライン蓄積・比較
+│   ├─ 異常検知アラート
+│   └─ ダッシュボード可視化
+│
+└─ ローカル実行（クラウド不要）
+    ├─ egress-policy: block によるリアルタイム遮断
+    └─ グローバルIOCリストによる既知脅威ブロック
+    </div>
+
+    <p>
+      Harden Runnerのステップが実行されると、まずStepSecurityのAPIに対してmonitorリクエストを送信し、
+      許可を得た場合にのみeBPFエージェントがランナーにインストールされます。
+    </p>
+  </section>
+
+  <!-- 3. Detection -->
+  <section id="detection">
+    <h2>3. 検知の仕組み</h2>
+    <p>
+      過去の実際のインシデント（tj-actions侵害、axios侵害など）がどのように検知されたかを整理します。
+    </p>
+
+    <h3>検知レイヤー</h3>
+    <table>
+      <tr><th>レイヤー</th><th>仕組み</th><th>有効モード</th></tr>
+      <tr>
+        <td>ベースライン比較</td>
+        <td>過去のrunから「通常の通信先」を学習。初めて現れるドメインへの通信を異常とみなす</td>
+        <td><span class="badge blue">audit</span> <span class="badge blue">block</span></td>
+      </tr>
+      <tr>
+        <td>グローバルIOCリスト</td>
+        <td>StepSecurity SOCが管理する既知悪意ドメイン/IPのリスト。全顧客共有</td>
+        <td><span class="badge blue">audit</span> <span class="badge blue">block</span></td>
+      </tr>
+      <tr>
+        <td>プロセス監視</td>
+        <td>逆シェル・メモリ読み取りなどの攻撃技法をカーネルレベルで検知</td>
+        <td><span class="badge blue">block</span></td>
+      </tr>
+      <tr>
+        <td>HTTPS可視化</td>
+        <td>L7レベルでAPI呼び出しの詳細を監視。トークン悪用を検出</td>
+        <td><span class="badge blue">audit</span> <span class="badge blue">block</span></td>
+      </tr>
+    </table>
+
+    <div class="callout info">
+      <strong>重要：auditモードでも検知は機能する</strong>
+      ブロックはしないが、ベースライン逸脱（未知ドメインへの初回通信）は
+      auditモードでも検知・記録されます。サプライチェーン攻撃の多くは
+      「攻撃者の新規ドメインへの通信」を伴うため、auditモードでも事後分析が可能です。
+    </div>
+
+    <h3>なぜ外部の侵害（tj-actions等）を検知できるのか</h3>
+    <p>
+      侵害されたActionのコードがランナー上で実行される際、攻撃者サーバーへの通信が発生します。
+      このタイミングで「ベースラインにない新規ドメインへの通信」としてフラグが立ちます。
+      外部リポジトリを監視しているのではなく、<strong>自分のランナー上での実行結果として検知</strong>しています。
+    </p>
+  </section>
+
+  <!-- 4. Demo -->
+  <section id="demo">
+    <h2>4. デモワークフローで確認した挙動</h2>
+    <p>本リポジトリに4つのワークフローを作成し、挙動を確認しました。</p>
+
+    <table>
+      <tr><th>ファイル</th><th>モード</th><th>結果</th><th>確認内容</th></tr>
+      <tr>
+        <td><code>01-audit.yml</code></td>
+        <td>audit</td>
+        <td><span class="badge green">成功</span></td>
+        <td>httpbin.org等への通信がSummaryに記録される</td>
+      </tr>
+      <tr>
+        <td><code>02-block.yml</code></td>
+        <td>block（許可リストあり）</td>
+        <td><span class="badge green">成功</span></td>
+        <td>許可リスト内のnpm・github.comへの通信は通過</td>
+      </tr>
+      <tr>
+        <td><code>03-block-violation.yml</code></td>
+        <td>block（狭い許可リスト）</td>
+        <td><span class="badge green">成功</span></td>
+        <td><code>|| echo</code>でエラーを握り潰しているため成功扱い</td>
+      </tr>
+      <tr>
+        <td><code>04-block-fail.yml</code></td>
+        <td>block（エラー握り潰しなし）</td>
+        <td><span class="badge red">失敗</span></td>
+        <td>httpbin.orgがブロックされcurlが失敗→ワークフロー停止</td>
+      </tr>
+    </table>
+
+    <h3>blockモードの設定例</h3>
+    <pre><code>- name: Harden Runner
+  uses: step-security/harden-runner@v2
+  with:
+    egress-policy: block
+    allowed-endpoints: >
+      github.com:443
+      api.github.com:443
+      registry.npmjs.org:443</code></pre>
+
+    <div class="callout warn">
+      <strong>注意：blockモードでワークフローを失敗させるには</strong>
+      ブロックされたコマンドの終了コードをそのままステップに伝えることが必要です。
+      <code>|| echo "..."</code>や<code>continue-on-error: true</code>があると
+      ブロックが発生してもワークフローは成功扱いになります。
+    </div>
+  </section>
+
+  <!-- 5. License -->
+  <section id="license">
+    <h2>5. ライセンスとサービス構造</h2>
+    <p>Harden Runnerはコードとサービスが明確に分離しています。</p>
+
+    <table>
+      <tr><th>対象</th><th>ライセンス</th><th>意味</th></tr>
+      <tr>
+        <td>GitHubリポジトリのコード</td>
+        <td><span class="badge blue">Apache 2.0</span></td>
+        <td>自由に閲覧・改変・再配布可能。商用利用も可</td>
+      </tr>
+      <tr>
+        <td>StepSecurityクラウドサービス</td>
+        <td><span class="badge gray">SaaS利用規約</span></td>
+        <td>ダッシュボード・ベースライン・異常検知はStepSecurityのサービスとして提供</td>
+      </tr>
+    </table>
+
+    <h3>実際の制限はコードではなくAPIで制御</h3>
+    <p>
+      ソースコード（<code>src/setup.ts</code>）を確認したところ、
+      アクション起動時に必ずStepSecurityのmonitor APIを呼び出す実装になっています。
+      APIがHTTP 409を返した場合、エージェントのインストールをスキップする仕組みです。
+    </p>
+
+    <pre><code>// setup.ts より抜粋
+const resp = await _http.postJson(
+  `${api_url}/github/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/monitor`,
+  monitorRequestData
+);
+
+if (String(statusCode) === "409") {
+  console.log(HARDEN_RUNNER_UNAVAILABLE_MESSAGE);
+  return; // エージェントインストールをスキップ
+}</code></pre>
+
+    <div class="callout info">
+      <strong>disable-telemetry: true を設定しても</strong>
+      このmonitor APIへの呼び出しはスキップされません。
+      テレメトリの無効化とエージェント起動の許可は別の処理です。
+    </div>
+
+    <h3>料金プラン</h3>
+    <table>
+      <tr><th>プラン</th><th>価格</th><th>対象</th></tr>
+      <tr><td>Community</td><td><span class="badge green">無料</span></td><td>パブリックリポジトリのみ・GitHub Hosted Runnerのみ</td></tr>
+      <tr><td>Enterprise</td><td><span class="badge gray">$16/開発者/月</span></td><td>プライベートリポジトリ・セルフホストランナー・優先サポート</td></tr>
+    </table>
+  </section>
+
+  <!-- 6. Private -->
+  <section id="private">
+    <h2>6. プライベートリポジトリでの挙動（実測）</h2>
+    <p>
+      本リポジトリをprivateに変更し<code>workflow_dispatch</code>で実行したところ、
+      以下の挙動が確認されました。
+    </p>
+
+    <div class="flow">
+      <div class="flow-item">
+        <div class="flow-num">1</div>
+        <div>Harden Runnerステップが起動し、StepSecurity monitor APIを呼び出す</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">2</div>
+        <div>APIがプライベートリポジトリ＋無料プランを検知し、エラーレスポンスを返す</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">3</div>
+        <div>eBPFエージェントのインストールをスキップ（監視・ブロック機能は無効）</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">4</div>
+        <div>ステップ自体は<span class="badge green">成功</span>扱いで終了。ワークフロー全体は通る</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">5</div>
+        <div>Job SummaryにHTML形式の警告が表示される</div>
+      </div>
+    </div>
+
+    <h3>実際に表示されたSummaryの内容</h3>
+    <div class="error-box">
+      <h4>⚠️ Your GitHub Actions Runtime Security is currently disabled!</h4>
+      <p>
+        It appears that you're using the Harden-Runner GitHub Action by StepSecurity within a
+        private repository. However, runtime security is not enabled as your organization hasn't
+        signed up for a free trial or a paid subscription yet.
+      </p>
+      <p style="margin-top:10px;">
+        To enable runtime security, start a free trial today by installing the
+        StepSecurity Actions Security GitHub App.
+      </p>
+    </div>
+
+    <div class="callout warn">
+      <strong>「落ちる」のではなく「何もしないまま成功する」</strong>
+      ワークフロー自体は失敗しないため、気づかずに無防備な状態で運用してしまうリスクがあります。
+      プライベートリポジトリで使用する場合は、Summaryの確認が必須です。
+    </div>
+  </section>
+
+  <!-- 7. Enterprise -->
+  <section id="enterprise">
+    <h2>7. エンタープライズ運用の考慮点</h2>
+
+    <table>
+      <tr><th>項目</th><th>Community（無料）</th><th>Enterprise</th></tr>
+      <tr><td>パブリックリポジトリ</td><td><span class="badge green">✓</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>プライベートリポジトリ</td><td><span class="badge red">✗</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>セルフホストランナー</td><td><span class="badge red">✗</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>ベースライン学習・異常検知</td><td><span class="badge red">✗</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>ダッシュボード可視化</td><td><span class="badge red">✗</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>ポリシーストア一元管理</td><td><span class="badge red">✗</span></td><td><span class="badge green">✓</span></td></tr>
+      <tr><td>egress-policy: block（ローカル）</td><td><span class="badge green">✓（publicのみ）</span></td><td><span class="badge green">✓</span></td></tr>
+    </table>
+
+    <h3>注意点</h3>
+    <ul style="padding-left:20px; font-size:14px; line-height:2;">
+      <li>ベースラインが安定しないと異常検知の精度が落ちる（依存関係のバージョンが頻繁に変わる場合など）</li>
+      <li><code>disable-telemetry: true</code> にするとクラウド機能は無効になるが、monitor APIへの呼び出し自体は残る</li>
+      <li>APIコールが失敗（タイムアウト等）した場合はエージェントがそのまま起動するケースがある</li>
+      <li>100人以上の開発者にはボリュームディスカウントあり</li>
+    </ul>
+  </section>
+
+  <!-- 8. Summary -->
+  <section id="summary">
+    <h2>8. まとめ</h2>
+
+    <h3>Harden Runnerとは何か</h3>
+    <p>
+      CI/CDランナー上のeBPFエージェントとして動作し、外部通信・プロセス・ファイル操作を監視するEDR的なツールです。
+      サプライチェーン攻撃を「ランナー上での実行時の通信」として捉えることで、
+      外部リポジトリを能動的に監視しなくても侵害を検知できます。
+    </p>
+
+    <h3>利用可否の判断基準</h3>
+    <table>
+      <tr><th>ユースケース</th><th>判断</th></tr>
+      <tr><td>OSSプロジェクト・個人のパブリックリポジトリ</td><td><span class="badge green">無料で利用可</span></td></tr>
+      <tr><td>社内プライベートリポジトリ</td><td><span class="badge gray">Enterprise契約が必要（$16/人/月）</span></td></tr>
+      <tr><td>プライベートで無料のまま使う</td><td><span class="badge red">APIレベルで無効化される（グレーではなくNG）</span></td></tr>
+      <tr><td>セルフホストランナー</td><td><span class="badge gray">Enterprise契約が必要</span></td></tr>
+    </table>
+
+    <div class="callout success">
+      <strong>コードはApache 2.0、制限はサービス規約で管理</strong>
+      ライセンス上の制限はコードではなくStepSecurityのクラウドAPIで技術的に強制されています。
+      グレーな領域はなく、プライベートリポジトリでの利用はEnterprise契約が前提です。
+    </div>
+  </section>
+
+  <footer>
+    <p>Harden Runner 調査レポート &nbsp;|&nbsp; 2026-05-17 &nbsp;|&nbsp; step-security/harden-runner@v2</p>
+  </footer>
+
+</div>
+</body>
+</html>
