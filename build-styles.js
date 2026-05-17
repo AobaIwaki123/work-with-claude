@@ -124,26 +124,23 @@ tr:hover td { background: #f8fafc; }
 
 /* Code */
 pre {
-  background: #1e293b;
-  color: #e2e8f0;
   border-radius: 8px;
-  padding: 20px 22px;
+  margin: 14px 0;
+  overflow: hidden;
+}
+pre code {
+  display: block;
   font-size: ${f.code};
   line-height: 1.6;
   overflow-x: auto;
-  margin: 14px 0;
+  white-space: pre;
 }
-code {
+:not(pre) > code {
   background: #f1f5f9;
   color: #0f3460;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: ${f.code};
-}
-pre code {
-  background: none;
-  color: inherit;
-  padding: 0;
 }
 
 /* Callout boxes */

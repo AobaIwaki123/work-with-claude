@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Harden Runner 調査レポート</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
 </head>
 <body>
 
@@ -65,21 +68,30 @@
       <strong>自分のCIランナー上に eBPFエージェントを仕込み、そのランナー上で起きていることを監視する</strong>設計です。
     </p>
 
-    <div class="arch">
-<span class="highlight">GitHub Actions Runner (ubuntu-latest)</span>
-├─ <span class="green">eBPF エージェント（Harden Runnerが起動時にインストール）</span>
-│   ├─ DNS クエリを全捕捉
-│   ├─ L3/L4 ネットワーク通信を監視
-│   └─ L7 HTTPS の宛先・内容も可視化
-│
-├─ <span class="yellow">StepSecurity クラウドバックエンド</span>
-│   ├─ ベースライン蓄積・比較
-│   ├─ 異常検知アラート
-│   └─ ダッシュボード可視化
-│
-└─ ローカル実行（クラウド不要）
-    ├─ egress-policy: block によるリアルタイム遮断
-    └─ グローバルIOCリストによる既知脅威ブロック
+    <div class="mermaid">
+flowchart TB
+  Runner[GitHub Actions Runner]
+
+  Runner --> eBPF
+  Runner --> Cloud
+  Runner --> Local
+
+  subgraph eBPF[eBPFエージェント]
+    DNS[DNS クエリを全捕捉]
+    L34[L3/L4 ネットワーク通信を監視]
+    L7[L7 HTTPS の宛先・内容を可視化]
+  end
+
+  subgraph Cloud[StepSecurity クラウドバックエンド]
+    Baseline[ベースライン蓄積・比較]
+    Alert[異常検知アラート]
+    Dashboard[ダッシュボード可視化]
+  end
+
+  subgraph Local[ローカル実行]
+    Block[egress-policy block によるリアルタイム遮断]
+    IOC[グローバルIOCリストによる既知脅威ブロック]
+  end
     </div>
 
     <p>
@@ -169,7 +181,7 @@
     </table>
 
     <h3>blockモードの設定例</h3>
-    <pre><code>- name: Harden Runner
+    <pre><code class="language-yaml">- name: Harden Runner
   uses: step-security/harden-runner@v2
   with:
     egress-policy: block
@@ -212,7 +224,7 @@
       APIがHTTP 409を返した場合、エージェントのインストールをスキップする仕組みです。
     </p>
 
-    <pre><code>// setup.ts より抜粋
+    <pre><code class="language-typescript">// setup.ts より抜粋
 const resp = await _http.postJson(
   `${api_url}/github/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/monitor`,
   monitorRequestData
@@ -345,5 +357,7 @@ if (String(statusCode) === "409") {
   </footer>
 
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
 </body>
 </html>
