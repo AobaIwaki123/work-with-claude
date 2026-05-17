@@ -1,5 +1,5 @@
 name: 01 - Audit Mode (観察)
-run-name: "[01] Audit — 通信を記録するだけ (${{ github.sha }})"
+run-name: "[01] Audit — 通信を記録するだけ"
 
 on:
   push:
