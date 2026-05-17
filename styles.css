@@ -222,3 +222,45 @@ footer {
   font-size: 13px;
   margin-top: 60px;
 }
+
+@media (min-width: 900px) {
+  .container    { max-width: 1000px; }
+  body          { font-size: 20px; }
+  header .label { font-size: 15px; }
+  header h1     { font-size: 39px; }
+  header .meta  { font-size: 17px; }
+  .toc h2       { font-size: 15px; }
+  .toc a        { font-size: 17px; }
+  section h2    { font-size: 25px; }
+  section h3    { font-size: 20px; }
+  table         { font-size: 17px; }
+  th            { font-size: 15px; }
+  pre, code, .arch { font-size: 16px; }
+  .callout      { font-size: 17px; }
+  .badge        { font-size: 14px; }
+  .flow-item    { font-size: 17px; }
+  .error-box    { font-size: 17px; }
+  .error-box h4 { font-size: 20px; }
+  footer        { font-size: 15px; }
+}
+
+@media (min-width: 1280px) {
+  .container    { max-width: 1100px; }
+  body          { font-size: 22px; }
+  header .label { font-size: 17px; }
+  header h1     { font-size: 44px; }
+  header .meta  { font-size: 20px; }
+  .toc h2       { font-size: 17px; }
+  .toc a        { font-size: 20px; }
+  section h2    { font-size: 29px; }
+  section h3    { font-size: 22px; }
+  table         { font-size: 20px; }
+  th            { font-size: 17px; }
+  pre, code, .arch { font-size: 18px; }
+  .callout      { font-size: 20px; }
+  .badge        { font-size: 16px; }
+  .flow-item    { font-size: 20px; }
+  .error-box    { font-size: 20px; }
+  .error-box h4 { font-size: 22px; }
+  footer        { font-size: 17px; }
+}

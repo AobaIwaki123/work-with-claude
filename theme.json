@@ -1,23 +1,27 @@
 {
   "fontSize": {
-    "base":     "17px",
-    "small":    "15px",
-    "xsmall":   "13px",
-    "h1":       "34px",
-    "h2":       "22px",
-    "h3":       "17px",
-    "toc":      "15px",
-    "tocLabel": "13px",
-    "table":    "15px",
+    "base":        "17px",
+    "small":       "15px",
+    "xsmall":      "13px",
+    "h1":          "34px",
+    "h2":          "22px",
+    "h3":          "17px",
+    "toc":         "15px",
+    "tocLabel":    "13px",
+    "table":       "15px",
     "tableHeader": "13px",
-    "code":     "14px",
-    "callout":  "15px",
-    "badge":    "12px",
-    "flow":     "15px",
-    "errorBox": "15px",
-    "footer":   "13px"
+    "code":        "14px",
+    "callout":     "15px",
+    "badge":       "12px",
+    "flow":        "15px",
+    "errorBox":    "15px",
+    "footer":      "13px"
   },
   "lineHeight": {
     "base": "1.8"
+  },
+  "responsive": {
+    "md": { "minWidth": "900px",  "scale": 1.15, "containerWidth": "1000px" },
+    "lg": { "minWidth": "1280px", "scale": 1.30, "containerWidth": "1100px" }
   }
 }

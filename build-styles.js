@@ -233,5 +233,35 @@ footer {
 }
 `;
 
-fs.writeFileSync(path.join(__dirname, "styles.css"), css, "utf8");
+// responsive media queries
+function scale(px, ratio) {
+  return Math.round(parseInt(px) * ratio) + "px";
+}
+
+const mediaQueries = Object.entries(theme.responsive || {}).map(([, bp]) => {
+  const s = bp.scale;
+  return `
+@media (min-width: ${bp.minWidth}) {
+  .container    { max-width: ${bp.containerWidth}; }
+  body          { font-size: ${scale(f.base, s)}; }
+  header .label { font-size: ${scale(f.xsmall, s)}; }
+  header h1     { font-size: ${scale(f.h1, s)}; }
+  header .meta  { font-size: ${scale(f.small, s)}; }
+  .toc h2       { font-size: ${scale(f.tocLabel, s)}; }
+  .toc a        { font-size: ${scale(f.toc, s)}; }
+  section h2    { font-size: ${scale(f.h2, s)}; }
+  section h3    { font-size: ${scale(f.h3, s)}; }
+  table         { font-size: ${scale(f.table, s)}; }
+  th            { font-size: ${scale(f.tableHeader, s)}; }
+  pre, code, .arch { font-size: ${scale(f.code, s)}; }
+  .callout      { font-size: ${scale(f.callout, s)}; }
+  .badge        { font-size: ${scale(f.badge, s)}; }
+  .flow-item    { font-size: ${scale(f.flow, s)}; }
+  .error-box    { font-size: ${scale(f.errorBox, s)}; }
+  .error-box h4 { font-size: ${scale(f.h3, s)}; }
+  footer        { font-size: ${scale(f.footer, s)}; }
+}`;
+}).join("\n");
+
+fs.writeFileSync(path.join(__dirname, "styles.css"), css + mediaQueries, "utf8");
 console.log("styles.css を生成しました（theme.json から）");
