@@ -1,7 +1,11 @@
-.PHONY: build commit
+.PHONY: build commit beer
 
 build:
 	node build-styles.js
+
+beer:
+	node beer-kentei/generate-glossary.js
+	node beer-kentei/generate-textbook.js
 
 commit: build
 	git add theme.json build-styles.js styles.css
