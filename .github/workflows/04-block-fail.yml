@@ -9,7 +9,7 @@ on:
 jobs:
   fail-on-block:
     runs-on: ubuntu-latest
-    if: false
+    if: false # 失敗することを前提としているため、手動で実行する場合はこの条件を外す必要があります。
     steps:
       - name: Harden Runner (block mode)
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
