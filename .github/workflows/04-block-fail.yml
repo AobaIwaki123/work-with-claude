@@ -9,9 +9,10 @@ on:
 jobs:
   fail-on-block:
     runs-on: ubuntu-latest
+    if: false
     steps:
       - name: Harden Runner (block mode)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -20,7 +21,7 @@ jobs:
             objects.githubusercontent.com:443
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Reach unlisted domain — ブロックされてActionが落ちる
         run: curl --max-time 10 https://httpbin.org/get
